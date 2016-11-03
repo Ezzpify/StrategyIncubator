@@ -1,16 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SQLite;
-using System.Threading;
-using System.Linq;
 using System.IO;
 
-namespace LatestStrats
+namespace StrategyIncubator
 {
     class Database
     {
         private SQLiteConnection _connection;
         private Log _log;
+
+        /*
+            DATABASE SETUP
+            --------------
+            TABLES:
+                timestamps
+                    COLUMNS:
+                        unix (Long)
+        */
 
         public Database(string database)
         {
@@ -19,19 +25,26 @@ namespace LatestStrats
             if (!File.Exists(database))
             {
                 SQLiteConnection.CreateFile(database);
-                _log.Write(Log.LogLevel.Success, $"Database created at {database}");
+                _log.Write(Log.LogLevel.Success, $"New database created at {database}");
             }
 
             _connection = new SQLiteConnection($"Data Source={database};Version=3;");
-            _connection.Open();
 
-            if (_connection.State != System.Data.ConnectionState.Open)
+            try
             {
-                _log.Write(Log.LogLevel.Error, $"Database could not open");
-                return;
+                _connection.Open();
             }
-
-            runsql("CREATE TABLE IF NOT EXISTS timestamps (unix Long)");
+            catch (Exception ex)
+            {
+                _log.Write(Log.LogLevel.Error, $"Error opening sqlite database {database}: {ex.Message}");
+            }
+            finally
+            {
+                if (_connection.State != System.Data.ConnectionState.Open)
+                    _log.Write(Log.LogLevel.Error, $"Database could not open successfully");
+                else
+                    runsql("CREATE TABLE IF NOT EXISTS timestamps (unix Long)");
+            }
         }
 
         private int runsql(string sql)

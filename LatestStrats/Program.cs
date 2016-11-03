@@ -1,4 +1,6 @@
-﻿namespace LatestStrats
+﻿using System;
+
+namespace StrategyIncubator
 {
     class Program
     {
@@ -6,6 +8,7 @@
 
         static void Main(string[] args)
         {
+            Console.Title = "Strategy Incubator";
             _session = new Session(Settings.GetSettings());
         }
     }

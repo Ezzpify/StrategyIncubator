@@ -3,11 +3,11 @@ using System.Threading;
 using System.ServiceModel.Syndication;
 using System.Xml;
 
-namespace LatestStrats
+namespace StrategyIncubator
 {
     class Session
     {
-        private DiscordCom _discord;
+        private DiscordApp _discord;
         private Database _database;
         private Timer _queryTimer;
         private Config _config;
@@ -26,7 +26,7 @@ namespace LatestStrats
                 return;
             }
 
-            _discord = new DiscordCom(_config);
+            _discord = new DiscordApp(_config);
             _queryTimer = new Timer(TimerCallback, null, 0, _config.interval);
             
             while (true)
@@ -37,21 +37,23 @@ namespace LatestStrats
         {
             XmlReader reader = XmlReader.Create(_config.rss);
             SyndicationFeed feed = SyndicationFeed.Load(reader);
-
+            
             foreach (var item in feed.Items.Where(x => x != null).Reverse())
             {
+                long unix = Functions.ConvertToUnixTime(item.PublishDate.DateTime);
+                if (_database.DoesUnixExist(unix))
+                    continue;
+
                 var post = new Post()
                 {
                     link = item.Id,
                     summary = item.Summary.Text,
-                    author = item.ElementExtensions.ReadElementExtensions<string>("creator", "http://purl.org/dc/elements/1.1/")[0]
+                    author = item.ElementExtensions
+                        /*Index 0 is the main author name in cd:creator*/
+                        .ReadElementExtensions<string>("creator", "http://purl.org/dc/elements/1.1/")[0]
                 };
 
                 if (!post.Validate())
-                    continue;
-
-                long unix = Functions.ConvertToUnixTime(item.PublishDate.DateTime);
-                if (_database.DoesUnixExist(unix))
                     continue;
 
                 _discord.SendMessage(post);

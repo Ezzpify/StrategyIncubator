@@ -4,7 +4,7 @@ using System.Threading;
 using System.IO;
 using System.Linq;
 
-namespace LatestStrats
+namespace StrategyIncubator
 {
     class Log
     {
@@ -29,7 +29,7 @@ namespace LatestStrats
             _logQueueSize = queueSize;
 
             Directory.CreateDirectory("Logs");
-            if (!File.Exists(logPath))
+            if (!File.Exists(_logPath))
             {
                 File.Create(_logPath).Close();
                 Console.WriteLine($"Log file '{_logName}' created for path '{_logPath}");

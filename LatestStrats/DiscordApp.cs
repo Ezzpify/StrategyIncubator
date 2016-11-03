@@ -3,19 +3,19 @@ using System.Threading;
 using Discord;
 using System.ComponentModel;
 
-namespace LatestStrats
+namespace StrategyIncubator
 {
-    class DiscordCom
+    class DiscordApp
     {
         private List<ulong> _ignoredusers;
         private DiscordClient _client;
         private BackgroundWorker _bwg;
         private Channel _channel;
-        private Config _config;
         private bool _connected;
+        private Config _config;
         private Log _log;
 
-        public DiscordCom(Config config)
+        public DiscordApp(Config config)
         {
             _log = new Log("Discord", "Discord.txt", 1);
             _config = config;
@@ -37,6 +37,9 @@ namespace LatestStrats
 
         private void _client_MessageReceived(object sender, MessageEventArgs e)
         {
+            if (e.User.Id == _client.CurrentUser.Id)
+                return;
+
             if (_channel == null)
             {
                 _channel = _client.GetChannel(_config.channelid);
@@ -44,14 +47,16 @@ namespace LatestStrats
                     _log.Write(Log.LogLevel.Error, "Error finding channel!");
                 else
                 {
-                    _log.Write(Log.LogLevel.Success, "OK!");
+                    _log.Write(Log.LogLevel.Success, "Got the channel!");
                     _connected = true;
                 }
+
+                return;
             }
 
             if (e.Channel.IsPrivate && !_ignoredusers.Contains(e.User.Id))
             {
-                e.User.SendMessage("I don't have anything in particular to say. But you can find my source code here: <https://github.com/Ezzpify/StrategyIncubator>.");
+                e.User.SendMessage("I don't have anything in particular to say. But you can find my source code here: https://github.com/Ezzpify/StrategyIncubator.");
                 _ignoredusers.Add(e.User.Id);
             }
         }
@@ -62,6 +67,7 @@ namespace LatestStrats
             {
                 await _client.Connect(_config.token, TokenType.Bot);
                 _client.SetGame(_config.game);
+                _log.Write(Log.LogLevel.Info, "Waiting for user to type a message to initialize...", false);
             });
         }
 
@@ -75,8 +81,11 @@ namespace LatestStrats
 
         public void SendMessage(Post post)
         {
-            string formatted = $"<{post.link}>\n{post.author}: {post.summary}";
-            _channel.SendMessage(formatted);
+            string formattedStr = $"*New strategy post by* ***{post.author}*** *to*"
+                + $"\n<{post.link}>"
+                + $"\n{post.summary}";
+
+            _channel.SendMessage(formattedStr);
         }
     }
 }

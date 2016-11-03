@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using System.IO;
 
-namespace LatestStrats
+namespace StrategyIncubator
 {
     class Settings
     {

@@ -1,4 +1,4 @@
-﻿namespace LatestStrats
+﻿namespace StrategyIncubator
 {
     class Post
     {
