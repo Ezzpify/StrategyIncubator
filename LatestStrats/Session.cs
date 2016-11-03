@@ -38,8 +38,7 @@ namespace LatestStrats
             XmlReader reader = XmlReader.Create(_config.rss);
             SyndicationFeed feed = SyndicationFeed.Load(reader);
 
-            var item = feed.Items.LastOrDefault();
-            if (item != null)
+            foreach (var item in feed.Items.Where(x => x != null).Reverse())
             {
                 var post = new Post()
                 {
@@ -49,14 +48,15 @@ namespace LatestStrats
                 };
 
                 if (!post.Validate())
-                    return;
+                    continue;
 
                 long unix = Functions.ConvertToUnixTime(item.PublishDate.DateTime);
                 if (_database.DoesUnixExist(unix))
-                    return;
+                    continue;
 
                 _discord.SendMessage(post);
                 _database.InsertUnix(unix);
+                _log.Write(Log.LogLevel.Info, $"Alerted about new post at {post.link}");
             }
         }
     }

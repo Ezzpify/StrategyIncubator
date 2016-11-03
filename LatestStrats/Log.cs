@@ -25,13 +25,13 @@ namespace LatestStrats
         public Log(string logName, string logPath, int queueSize)
         {
             _logName = logName;
-            _logPath = logPath;
+            _logPath = Path.Combine("Logs", logPath);
             _logQueueSize = queueSize;
 
             Directory.CreateDirectory("Logs");
             if (!File.Exists(logPath))
             {
-                File.Create(Path.Combine("Logs", logPath)).Close();
+                File.Create(_logPath).Close();
                 Console.WriteLine($"Log file '{_logName}' created for path '{_logPath}");
                 Thread.Sleep(250);
             }
