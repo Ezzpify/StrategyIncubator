@@ -81,8 +81,9 @@ namespace StrategyIncubator
 
         public void SendMessage(Post post)
         {
-            string formattedStr = $"*New strategy post by* ***{post.author}*** *to*"
+            string formattedStr = $"*New strategy post by* ***{post.author}*** *to thread* ***{post.title}***"
                 + $"\n<{post.link}>"
+                + $"\n--------------------------------------------"
                 + $"\n{post.summary}";
 
             _channel.SendMessage(formattedStr);

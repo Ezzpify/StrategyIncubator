@@ -46,6 +46,7 @@ namespace StrategyIncubator
 
                 var post = new Post()
                 {
+                    title = item.Title.Text,
                     link = item.Id,
                     summary = item.Summary.Text,
                     author = item.ElementExtensions
