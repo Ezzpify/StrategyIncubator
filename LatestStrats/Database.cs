@@ -16,6 +16,14 @@ namespace StrategyIncubator
                 timestamps
                     COLUMNS:
                         unix (Long)
+
+            LOGIC
+            --------------
+            There is no ID attached for each post so we take the
+            post date and convert it to a unix timestamp and use
+            that as an ID so we can prevent the same post being
+            alerted more than once. The odds of multiple posts
+            being made at the exact same second is very slim.
         */
 
         public Database(string database)
