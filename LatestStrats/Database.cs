@@ -106,10 +106,10 @@ namespace StrategyIncubator
                 {
                     _log.Write(Log.LogLevel.Error, $"Error retrieving unix values. {ex.Message}");
 
-                    /*We'll return false since if a database error
+                    /*We'll return true since if a database error
                     should happen then we want to avoid having the
                     bot spam the same message over and over again*/
-                    return false;
+                    return true;
                 }
             }
         }
