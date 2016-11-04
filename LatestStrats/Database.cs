@@ -4,7 +4,7 @@ using System.IO;
 
 namespace StrategyIncubator
 {
-    class Database : IDisposable
+    class Database
     {
         private SQLiteConnection _connection;
         private Log _log;
@@ -117,14 +117,6 @@ namespace StrategyIncubator
         public void CloseConnection()
         {
             _connection.Close();
-        }
-
-        public void Dispose()
-        {
-            _connection.Dispose();
-
-            Dispose();
-            GC.SuppressFinalize(this);
         }
     }
 }

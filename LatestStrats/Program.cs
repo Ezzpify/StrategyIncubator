@@ -14,9 +14,6 @@ namespace StrategyIncubator
             /*Session will hi-jack this thread until it's complete*/
             _session = new Session(Settings.GetSettings());
 
-            /*Session died*/
-            _session.Dispose();
-
             Console.WriteLine("\n\n\nPress any key to exit...");
             Console.ReadKey();
         }

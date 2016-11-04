@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace StrategyIncubator
 {
-    class Session : IDisposable
+    class Session
     {
         private DiscordApp _discord;
         private Database _database;
@@ -35,14 +35,9 @@ namespace StrategyIncubator
                 Thread.Sleep(5000);
 
             _log.Write(Log.LogLevel.Error, $"Discord disconnected. Ending session...");
-
             _queryTimer.Change(Timeout.Infinite, Timeout.Infinite);
             _database.CloseConnection();
             _discord.Disconnect();
-
-            _queryTimer.Dispose();
-            _database.Dispose();
-            _discord.Dispose();
         }
 
         private void queryTimerCallback(object o)
@@ -94,16 +89,6 @@ namespace StrategyIncubator
             /*Index 0 is the main author name in cd:creator*/
             post.author = elements.Count() > 0 ? elements[0] : "Unknown";
             return post;
-        }
-
-        public void Dispose()
-        {
-            _database.Dispose();
-            _discord.Dispose();
-            _queryTimer.Dispose();
-
-            Dispose();
-            GC.SuppressFinalize(this);
         }
     }
 }

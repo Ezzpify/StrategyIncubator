@@ -5,7 +5,7 @@ using Discord;
 
 namespace StrategyIncubator
 {
-    class DiscordApp : IDisposable
+    class DiscordApp
     {
         private BackgroundWorker _bwg;
         private DiscordClient _client;
@@ -106,15 +106,6 @@ namespace StrategyIncubator
         public void Disconnect()
         {
             _client.Disconnect();
-        }
-
-        public virtual void Dispose()
-        {
-            _bwg.Dispose();
-            _client.Dispose();
-
-            Dispose();
-            GC.SuppressFinalize(this);
         }
     }
 }
