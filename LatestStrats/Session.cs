@@ -38,7 +38,8 @@ namespace StrategyIncubator
 
         private void TimerCallback(object o)
         {
-            SyndicationFeed feed = null;
+            SyndicationFeed feed;
+
             try
             {
                 XmlReader reader = XmlReader.Create(_config.rss);
