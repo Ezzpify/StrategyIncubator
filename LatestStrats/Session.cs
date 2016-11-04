@@ -28,17 +28,18 @@ namespace StrategyIncubator
             }
 
             _discord = new DiscordApp(_config);
-            _queryTimer = new Timer(queryTimerCallback, null, 0, 
+            _queryTimer = new Timer(queryTimerCallback, null, 0,
                 Functions.ConvertMinutesToMilliseconds(_config.intervalMinutes));
-            
+
             while (_discord.IsConnected())
                 Thread.Sleep(5000);
 
             _log.Write(Log.LogLevel.Error, $"Discord disconnected. Ending session...");
+
             _queryTimer.Change(Timeout.Infinite, Timeout.Infinite);
             _database.CloseConnection();
             _discord.Disconnect();
-        }
+        } 
 
         private void queryTimerCallback(object o)
         {

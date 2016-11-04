@@ -49,9 +49,13 @@ namespace StrategyIncubator
             finally
             {
                 if (_connection.State != System.Data.ConnectionState.Open)
+                {
                     _log.Write(Log.LogLevel.Error, $"Database could not open successfully");
+                }
                 else
+                {
                     runSql("CREATE TABLE IF NOT EXISTS timestamps (unix Long)");
+                }
             }
         }
 

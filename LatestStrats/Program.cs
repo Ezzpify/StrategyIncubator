@@ -9,10 +9,14 @@ namespace StrategyIncubator
 
         static void Main(string[] args)
         {
-            Console.Title = $"Strategy Incubator v{Assembly.GetExecutingAssembly().GetName().Version}";
+            var settings = Settings.GetSettings();
+            if (settings != null)
+            {
+                settings.appversion = $"{Assembly.GetExecutingAssembly().GetName().Version}";
 
-            /*Session will hi-jack this thread until it's complete*/
-            _session = new Session(Settings.GetSettings());
+                Console.Title = $"Strategy Incubator v{settings.appversion}";
+                _session = new Session(settings);
+            }
 
             Console.WriteLine("\n\n\nPress any key to exit...");
             Console.ReadKey();

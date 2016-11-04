@@ -21,6 +21,8 @@ namespace StrategyIncubator
             _client = new DiscordClient(o =>
             {
                 o.AppName = _config.appname;
+                o.AppUrl = "https://github.com/Ezzpify/StrategyIncubator";
+                o.AppVersion = _config.appversion;
             });
             _client.MessageReceived += _client_MessageReceived;
             

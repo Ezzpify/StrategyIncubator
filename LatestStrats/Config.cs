@@ -1,4 +1,6 @@
-﻿namespace StrategyIncubator
+﻿using Newtonsoft.Json;
+
+namespace StrategyIncubator
 {
     public class Config
     {
@@ -9,5 +11,8 @@
         public ulong channelid { get; set; } = 0;
         public int intervalMinutes { get; set; } = 2;
         public string discordmsg { get; set; } = "";
+
+        [JsonIgnore]
+        public string appversion { get; set; } = "";
     }
 }
