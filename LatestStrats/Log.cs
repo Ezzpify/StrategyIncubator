@@ -101,6 +101,8 @@ namespace StrategyIncubator
 
                         _logQueue.Clear();
                     }
+                    /*CA2202
+                    Ignored because it's dumb*/
                 }
             }
             catch (Exception ex)

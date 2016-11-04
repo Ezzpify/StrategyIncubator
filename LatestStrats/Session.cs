@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace StrategyIncubator
 {
-    class Session
+    class Session : IDisposable
     {
         private DiscordApp _discord;
         private Database _database;
@@ -22,21 +22,30 @@ namespace StrategyIncubator
 
             if (_config == null)
             {
-                _log.Write(Log.LogLevel.Error, $"Config is null, cannot continue");
-                Thread.Sleep(1500);
+                _log.Write(Log.LogLevel.Error, $"Config is null, cannot continue. Press any key to exit.");
+                Console.ReadKey();
                 return;
             }
 
             _discord = new DiscordApp(_config);
-            _queryTimer = new Timer(TimerCallback, null, 0, _config.interval);
+            _queryTimer = new Timer(queryTimerCallback, null, 0, 
+                Functions.ConvertMinutesToMilliseconds(_config.intervalMinutes));
             
             while (_discord.IsConnected())
-                Thread.Sleep(2500);
+                Thread.Sleep(5000);
 
-            _log.Write(Log.LogLevel.Error, $"Discord disconnected. Session ending...");
+            _log.Write(Log.LogLevel.Error, $"Discord disconnected. Ending session...");
+
+            _queryTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            _database.CloseConnection();
+            _discord.Disconnect();
+
+            _queryTimer.Dispose();
+            _database.Dispose();
+            _discord.Dispose();
         }
 
-        private void TimerCallback(object o)
+        private void queryTimerCallback(object o)
         {
             SyndicationFeed feed;
 
@@ -85,6 +94,16 @@ namespace StrategyIncubator
             /*Index 0 is the main author name in cd:creator*/
             post.author = elements.Count() > 0 ? elements[0] : "Unknown";
             return post;
+        }
+
+        public void Dispose()
+        {
+            _database.Dispose();
+            _discord.Dispose();
+            _queryTimer.Dispose();
+
+            Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
-using Discord;
 using System.ComponentModel;
+using Discord;
 
 namespace StrategyIncubator
 {
-    class DiscordApp
+    class DiscordApp : IDisposable
     {
         private BackgroundWorker _bwg;
         private DiscordClient _client;
@@ -36,6 +35,9 @@ namespace StrategyIncubator
 
         private void _client_MessageReceived(object sender, MessageEventArgs e)
         {
+            /*Messages that this bot posts also triggers MessageReceived,
+            so for that we need to filter these messages out to avoid
+            processing our own messages*/
             if (e.User.Id == _client.CurrentUser.Id)
                 return;
 
@@ -44,7 +46,7 @@ namespace StrategyIncubator
                 /*To initialize the bot account it needs to see a message.
                 I don't know why, but simply typing in any channel or server
                 that the bot is in (private message included) allows the bot
-                to find channels among the servers it's connected to
+                to find channels among the servers it's connected to.
                 
                 So after a message has been seen by the bot we'll find our
                 posting channel using the Channel ID provided in the Settings.*/
@@ -92,13 +94,27 @@ namespace StrategyIncubator
             }
             catch (Exception ex)
             {
-                _log.Write(Log.LogLevel.Error, $"Unable to send message to channel. {ex.Message}");
+                _log.Write(Log.LogLevel.Error, $"Unable to send message to channel.\n{msgStr}\n{ex.Message}");
             }
         }
 
         public bool IsConnected()
         {
             return _client.State == ConnectionState.Connected;
+        }
+
+        public void Disconnect()
+        {
+            _client.Disconnect();
+        }
+
+        public virtual void Dispose()
+        {
+            _bwg.Dispose();
+            _client.Dispose();
+
+            Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

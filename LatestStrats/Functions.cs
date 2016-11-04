@@ -16,10 +16,16 @@ namespace StrategyIncubator
             return str != null ? str : "Unknown";
         }
 
+        public static int ConvertMinutesToMilliseconds(int minutes)
+        {
+            return (int)TimeSpan.FromMinutes(minutes).TotalMilliseconds;
+        }
+
         public static string DiscordifyString(string str)
         {
             /*Add < > around links to avoid Discord making a link preview
-            in the client which takes up a lot of space if more than one link*/
+            in the client which takes up a lot of space if there aremore 
+            than just one link in the string*/
             str = Regex.Replace(str, @"(https?://[^\s]+)", "<$1>");
 
             /*Replace newline characters with a space to fit in as much

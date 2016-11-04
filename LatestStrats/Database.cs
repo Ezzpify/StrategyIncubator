@@ -4,7 +4,7 @@ using System.IO;
 
 namespace StrategyIncubator
 {
-    class Database
+    class Database : IDisposable
     {
         private SQLiteConnection _connection;
         private Log _log;
@@ -26,17 +26,17 @@ namespace StrategyIncubator
             being made at the exact same second is very slim.
         */
 
-        public Database(string database)
+        public Database(string databaseLocation)
         {
             _log = new Log("Database", "Database.txt", 1);
 
-            if (!File.Exists(database))
+            if (!File.Exists(databaseLocation))
             {
-                SQLiteConnection.CreateFile(database);
-                _log.Write(Log.LogLevel.Success, $"New database created at {database}");
+                SQLiteConnection.CreateFile(databaseLocation);
+                _log.Write(Log.LogLevel.Success, $"New database created at {databaseLocation}");
             }
 
-            _connection = new SQLiteConnection($"Data Source={database};Version=3;");
+            _connection = new SQLiteConnection($"Data Source={databaseLocation};Version=3;");
 
             try
             {
@@ -44,19 +44,22 @@ namespace StrategyIncubator
             }
             catch (Exception ex)
             {
-                _log.Write(Log.LogLevel.Error, $"Error opening sqlite database {database}: {ex.Message}");
+                _log.Write(Log.LogLevel.Error, $"Error opening sqlite database {databaseLocation}: {ex.Message}");
             }
             finally
             {
                 if (_connection.State != System.Data.ConnectionState.Open)
                     _log.Write(Log.LogLevel.Error, $"Database could not open successfully");
                 else
-                    runsql("CREATE TABLE IF NOT EXISTS timestamps (unix Long)");
+                    runSql("CREATE TABLE IF NOT EXISTS timestamps (unix Long)");
             }
         }
 
-        private int runsql(string sql)
+        private int runSql(string sql)
         {
+            /* CA2100
+            Should only be used to run inhouse querys which does not
+            come from user input since the values does not get sanitized*/
             using (var cmd = new SQLiteCommand(sql, _connection))
             {
                 try
@@ -65,8 +68,8 @@ namespace StrategyIncubator
                 }
                 catch (IOException ex)
                 {
-                    _log.Write(Log.LogLevel.Error, $"Error executing SQL: {sql}");
-                    return 0;
+                    _log.Write(Log.LogLevel.Error, $"Error executing SQL: {sql}\n{ex.Message}");
+                    return -1;
                 }
             }
         }
@@ -76,14 +79,52 @@ namespace StrategyIncubator
             using (var cmd = new SQLiteCommand("INSERT INTO timestamps (unix) values (?)", _connection))
             {
                 cmd.Parameters.AddWithValue("unix", unix);
-                return cmd.ExecuteNonQuery();
+
+                try
+                {
+                    return cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    _log.Write(Log.LogLevel.Error, $"Error inserting unix value to database. {ex.Message}");
+                    return -1;
+                }
             }
         }
 
         public bool DoesUnixExist(long unix)
         {
-            using (var cmd = new SQLiteCommand($"SELECT count(*) FROM timestamps WHERE unix = '{unix}'", _connection))
-                return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+            using (var cmd = new SQLiteCommand("SELECT count(*) FROM timestamps WHERE unix = @UNIX_VALUE", _connection))
+            {
+                cmd.Parameters.Add("@UNIX_VALUE", System.Data.DbType.Int64).Value = unix;
+
+                try
+                {
+                    return (int)(cmd.ExecuteScalar()) > 0;
+                }
+                catch (Exception ex)
+                {
+                    _log.Write(Log.LogLevel.Error, $"Error retrieving unix values. {ex.Message}");
+
+                    /*We'll return false since if a database error
+                    should happen then we want to avoid having the
+                    bot spam the same message over and over again*/
+                    return false;
+                }
+            }
+        }
+
+        public void CloseConnection()
+        {
+            _connection.Close();
+        }
+
+        public void Dispose()
+        {
+            _connection.Dispose();
+
+            Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

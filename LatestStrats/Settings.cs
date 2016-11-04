@@ -12,20 +12,22 @@ namespace StrategyIncubator
             {
                 File.WriteAllText(Endpoint.SETTINGS_FILE, JsonConvert.SerializeObject(new Config(), Formatting.Indented));
                 Console.WriteLine("Settings file created");
-                return null;
             }
+            else
+            {
+                string json = File.ReadAllText(Endpoint.SETTINGS_FILE);
 
-            string json = File.ReadAllText(Endpoint.SETTINGS_FILE);
+                try
+                {
+                    return JsonConvert.DeserializeObject<Config>(json);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Settings threw an exception: {ex.Message}");
+                }
+            }
             
-            try
-            {
-                return JsonConvert.DeserializeObject<Config>(json);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Settings threw an exception: {ex.Message}");
-                return null;
-            }
+            return null;
         }
     }
 }
