@@ -100,7 +100,7 @@ namespace StrategyIncubator
 
                 try
                 {
-                    return (int)(cmd.ExecuteScalar()) > 0;
+                    return Convert.ToInt64(cmd.ExecuteScalar()) > 0;
                 }
                 catch (Exception ex)
                 {
