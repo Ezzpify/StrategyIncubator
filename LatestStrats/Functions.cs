@@ -13,5 +13,10 @@ namespace StrategyIncubator
             DateTime sTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return (long)(datetime - sTime).TotalSeconds;
         }
+
+        public static string NullcheckStr(string str)
+        {
+            return str != null ? str : "Unknown";
+        }
     }
 }

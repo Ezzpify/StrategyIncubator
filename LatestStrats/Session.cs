@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.ServiceModel.Syndication;
 using System.Xml;
@@ -29,14 +30,25 @@ namespace StrategyIncubator
             _discord = new DiscordApp(_config);
             _queryTimer = new Timer(TimerCallback, null, 0, _config.interval);
             
-            while (true)
-                Thread.Sleep(500);
+            while (_discord.IsConnected())
+                Thread.Sleep(2500);
+
+            _log.Write(Log.LogLevel.Error, $"Discord disconnected. Session ending...");
         }
 
-        void TimerCallback(object o)
+        private void TimerCallback(object o)
         {
-            XmlReader reader = XmlReader.Create(_config.rss);
-            SyndicationFeed feed = SyndicationFeed.Load(reader);
+            SyndicationFeed feed = null;
+            try
+            {
+                XmlReader reader = XmlReader.Create(_config.rss);
+                feed = SyndicationFeed.Load(reader);
+            }
+            catch (Exception ex)
+            {
+                _log.Write(Log.LogLevel.Error, $"Error parsing xml. {ex}");
+                return;
+            }
             
             foreach (var item in feed.Items.Where(x => x != null).Reverse())
             {
@@ -44,23 +56,30 @@ namespace StrategyIncubator
                 if (_database.DoesUnixExist(unix))
                     continue;
 
-                var post = new Post()
+                Post post = GetPostFromXmlItem(item);
+                if (post.Validate())
                 {
-                    title = item.Title.Text,
-                    link = item.Id,
-                    summary = item.Summary.Text,
-                    author = item.ElementExtensions
-                        /*Index 0 is the main author name in cd:creator*/
-                        .ReadElementExtensions<string>("creator", "http://purl.org/dc/elements/1.1/")[0]
-                };
-
-                if (!post.Validate())
-                    continue;
-
-                _discord.SendMessage(post);
-                _database.InsertUnix(unix);
-                _log.Write(Log.LogLevel.Info, $"Alerted about new post at {post.link}");
+                    _discord.SendMessage(post);
+                    _database.InsertUnix(unix);
+                }
             }
+        }
+
+        private Post GetPostFromXmlItem(SyndicationItem item)
+        {
+            var post = new Post()
+            {
+                title = Functions.NullcheckStr(item.Title.Text),
+                link = Functions.NullcheckStr(item.Id),
+                summary = Functions.NullcheckStr(item.Summary.Text)
+            };
+
+            var elements = item.ElementExtensions
+                    .ReadElementExtensions<string>("creator", "http://purl.org/dc/elements/1.1/");
+
+            /*Index 0 is the main author name in cd:creator*/
+            post.author = elements.Count() > 0 ? elements[0] : "Unknown";
+            return post;
         }
     }
 }

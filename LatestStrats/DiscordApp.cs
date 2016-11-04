@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Discord;
 using System.ComponentModel;
@@ -7,11 +8,9 @@ namespace StrategyIncubator
 {
     class DiscordApp
     {
-        private List<ulong> _ignoredusers;
-        private DiscordClient _client;
         private BackgroundWorker _bwg;
+        private DiscordClient _client;
         private Channel _channel;
-        private bool _connected;
         private Config _config;
         private Log _log;
 
@@ -31,7 +30,7 @@ namespace StrategyIncubator
             _bwg.RunWorkerCompleted += _bwg_RunWorkerCompleted;
             _bwg.RunWorkerAsync();
 
-            while (!_connected)
+            while (_channel == null)
                 Thread.Sleep(500);
         }
 
@@ -42,22 +41,19 @@ namespace StrategyIncubator
 
             if (_channel == null)
             {
+                /*To initialize the bot account it needs to see a message.
+                I don't know why, but simply typing in any channel or server
+                that the bot is in (private message included) allows the bot
+                to find channels among the servers it's connected to
+                
+                So after a message has been seen by the bot we'll find our
+                posting channel using the Channel ID provided in the Settings.*/
                 _channel = _client.GetChannel(_config.channelid);
+
                 if (_channel == null)
                     _log.Write(Log.LogLevel.Error, "Error finding channel!");
                 else
-                {
                     _log.Write(Log.LogLevel.Success, "Got the channel!");
-                    _connected = true;
-                }
-
-                return;
-            }
-
-            if (e.Channel.IsPrivate && !_ignoredusers.Contains(e.User.Id))
-            {
-                e.User.SendMessage("I don't have anything in particular to say. But you can find my source code here: https://github.com/Ezzpify/StrategyIncubator.");
-                _ignoredusers.Add(e.User.Id);
             }
         }
 
@@ -82,11 +78,24 @@ namespace StrategyIncubator
         public void SendMessage(Post post)
         {
             string formattedStr = $"*New strategy post by* ***{post.author}*** *to thread* ***{post.title}***"
-                + $"\n<{post.link}>"
+                + $"\n*Thread: <{post.link}>*"
                 + $"\n--------------------------------------------"
                 + $"\n{post.summary}";
 
-            _channel.SendMessage(formattedStr);
+            try
+            {
+                _channel.SendMessage(formattedStr);
+                _log.Write(Log.LogLevel.Info, $"Alerted about new post at {post.link}");
+            }
+            catch (Exception ex)
+            {
+                _log.Write(Log.LogLevel.Error, $"Unable to send message to channel. {ex.Message}");
+            }
+        }
+
+        public bool IsConnected()
+        {
+            return _client.State == ConnectionState.Connected;
         }
     }
 }
