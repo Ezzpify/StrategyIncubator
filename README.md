@@ -19,5 +19,6 @@ Settings.json
   "token": "Discord bot token",
   "channelid": 219919180525207552, //Discord channel ID
   "interval": 120000 //Interval between rss checks in milliseconds
+  "discordmsg": "Author: {0} Post title: {1} Forum link: {2} Post summary {3}" //{0}-{3} needs to be included since they are being formatted.
 }
 ```
