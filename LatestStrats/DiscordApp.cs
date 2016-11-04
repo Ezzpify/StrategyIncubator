@@ -23,7 +23,7 @@ namespace StrategyIncubator
                 o.AppName = _config.appname;
             });
             _client.MessageReceived += _client_MessageReceived;
-
+            
             _bwg = new BackgroundWorker();
             _bwg.DoWork += _bwg_DoWork;
             _bwg.RunWorkerCompleted += _bwg_RunWorkerCompleted;

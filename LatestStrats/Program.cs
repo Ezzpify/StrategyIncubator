@@ -10,6 +10,8 @@ namespace StrategyIncubator
         static void Main(string[] args)
         {
             Console.Title = $"Strategy Incubator v{Assembly.GetExecutingAssembly().GetName().Version}";
+
+            /*Session will hi-jack this thread until it's complete*/
             _session = new Session(Settings.GetSettings());
 
             /*Session died*/
