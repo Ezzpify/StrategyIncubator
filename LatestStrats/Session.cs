@@ -50,6 +50,9 @@ namespace StrategyIncubator
                 return;
             }
             
+            /*We reverse the list since newest post is always at the top,
+            but if two posts are made after eachother we want to alert about
+            the oldest one first, so we reverse the list.*/
             foreach (var item in feed.Items.Where(x => x != null).Reverse())
             {
                 long unix = Functions.ConvertToUnixTime(item.PublishDate.DateTime);
