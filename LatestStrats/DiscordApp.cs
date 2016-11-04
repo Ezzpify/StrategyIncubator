@@ -77,14 +77,17 @@ namespace StrategyIncubator
 
         public void SendMessage(Post post)
         {
-            string formattedStr = $"*New strategy post by* ***{post.author}*** *to thread* ***{post.title}***"
-                + $"\n*Thread: <{post.link}>*"
-                + $"\n--------------------------------------------"
-                + $"\n{post.summary}";
+            /*_config.discordmsg string should include {0}, {1}, {2} & {3}
+            for formatting the message here*/
+            string msgStr = string.Format(_config.discordmsg, 
+                post.author, 
+                post.title, 
+                post.link, 
+                post.summary);
 
             try
             {
-                _channel.SendMessage(formattedStr);
+                _channel.SendMessage(msgStr);
                 _log.Write(Log.LogLevel.Info, $"Alerted about new post at {post.link}");
             }
             catch (Exception ex)

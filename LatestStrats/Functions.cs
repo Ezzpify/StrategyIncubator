@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace StrategyIncubator
 {
@@ -17,6 +14,22 @@ namespace StrategyIncubator
         public static string NullcheckStr(string str)
         {
             return str != null ? str : "Unknown";
+        }
+
+        public static string DiscordifyString(string str)
+        {
+            /*Add < > around links to avoid Discord making a link preview
+            in the client which takes up a lot of space if more than one link*/
+            str = Regex.Replace(str, @"(https?://[^\s]+)", "<$1>");
+
+            /*Replace newline characters with a space to fit in as much
+            text as possible from the summary to make it more compact*/
+            str = Regex.Replace(str, @"\r\n?|\n", " ");
+
+            /*Replaces double spaces with a single space*/
+            str = Regex.Replace(str, @"\s+", " ");
+
+            return str;
         }
     }
 }

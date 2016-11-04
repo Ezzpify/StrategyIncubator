@@ -50,7 +50,7 @@ namespace StrategyIncubator
                 _log.Write(Log.LogLevel.Error, $"Error parsing xml. {ex}");
                 return;
             }
-            
+
             /*We reverse the list since newest post is always at the top,
             but if two posts are made after eachother we want to alert about
             the oldest one first, so we reverse the list.*/
@@ -75,7 +75,8 @@ namespace StrategyIncubator
             {
                 title = Functions.NullcheckStr(item.Title.Text),
                 link = Functions.NullcheckStr(item.Id),
-                summary = Functions.NullcheckStr(item.Summary.Text)
+                summary = Functions.DiscordifyString
+                    (Functions.NullcheckStr(item.Summary.Text))
             };
 
             var elements = item.ElementExtensions

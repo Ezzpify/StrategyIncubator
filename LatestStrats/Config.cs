@@ -8,5 +8,6 @@
         public string token { get; set; } = "";
         public ulong channelid { get; set; } = 0;
         public int interval { get; set; } = 60000;
+        public string discordmsg { get; set; } = "";
     }
 }
