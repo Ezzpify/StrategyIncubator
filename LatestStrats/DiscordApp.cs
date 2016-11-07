@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Collections.Generic;
 using System.ComponentModel;
 using Discord;
 
@@ -45,7 +46,11 @@ namespace StrategyIncubator
 
             /*We'll need to receive a message first in order to find channels
             for some reason, so this is what we will do.*/
-            _initialized = true;
+            if (!_initialized)
+            {
+                _log.Write(Log.LogLevel.Success, $"All done! Tasks started.");
+                _initialized = true;
+            }
         }
 
         private void _bwg_DoWork(object sender, DoWorkEventArgs e)
