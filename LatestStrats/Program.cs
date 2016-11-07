@@ -9,7 +9,7 @@ namespace StrategyIncubator
 
         static void Main(string[] args)
         {
-            var settings = Settings.GetSettings();
+            var settings = Settings.GetConfig();
             if (settings != null)
             {
                 settings.appversion = $"{Assembly.GetExecutingAssembly().GetName().Version}";

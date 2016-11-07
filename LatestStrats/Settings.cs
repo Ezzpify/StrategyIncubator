@@ -6,7 +6,7 @@ namespace StrategyIncubator
 {
     class Settings
     {
-        public static Config GetSettings()
+        public static Config GetConfig()
         {
             if (!File.Exists(Endpoint.SETTINGS_FILE))
             {

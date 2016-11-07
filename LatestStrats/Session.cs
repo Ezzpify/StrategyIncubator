@@ -43,33 +43,36 @@ namespace StrategyIncubator
 
         private void queryTimerCallback(object o)
         {
-            SyndicationFeed feed;
-
-            try
+            foreach (var task in _config.tasks)
             {
-                XmlReader reader = XmlReader.Create(_config.rss);
-                feed = SyndicationFeed.Load(reader);
-            }
-            catch (Exception ex)
-            {
-                _log.Write(Log.LogLevel.Error, $"Error parsing xml. {ex}");
-                return;
-            }
+                SyndicationFeed feed;
 
-            /*We reverse the list since newest post is always at the top,
-            but if two posts are made after eachother we want to alert about
-            the oldest one first, so we reverse the list.*/
-            foreach (var item in feed.Items.Where(x => x != null).Reverse())
-            {
-                long unix = Functions.ConvertToUnixTime(item.PublishDate.DateTime);
-                if (_database.DoesUnixExist(unix))
-                    continue;
-
-                Post post = GetPostFromXmlItem(item);
-                if (post.Validate())
+                try
                 {
-                    _discord.SendMessage(post);
-                    _database.InsertUnix(unix);
+                    XmlReader reader = XmlReader.Create(task.rss);
+                    feed = SyndicationFeed.Load(reader);
+                }
+                catch (Exception ex)
+                {
+                    _log.Write(Log.LogLevel.Error, $"Error parsing xml. {ex}");
+                    return;
+                }
+
+                /*We reverse the list since newest post is always at the top,
+                but if two posts are made after eachother we want to alert about
+                the oldest one first, so we reverse the list.*/
+                foreach (var item in feed.Items.Where(x => x != null).Reverse())
+                {
+                    long unix = Functions.ConvertToUnixTime(item.PublishDate.DateTime);
+                    if (_database.DoesUnixExist(unix))
+                        continue;
+
+                    Post post = GetPostFromXmlItem(item);
+                    if (post.Validate())
+                    {
+                        _discord.SendMessage(post, task);
+                        _database.InsertUnix(unix);
+                    }
                 }
             }
         }

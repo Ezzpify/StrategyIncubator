@@ -9,7 +9,7 @@ namespace StrategyIncubator
     {
         private BackgroundWorker _bwg;
         private DiscordClient _client;
-        private Channel _channel;
+        private bool _initialized;
         private Config _config;
         private Log _log;
 
@@ -31,7 +31,7 @@ namespace StrategyIncubator
             _bwg.RunWorkerCompleted += _bwg_RunWorkerCompleted;
             _bwg.RunWorkerAsync();
 
-            while (_channel == null)
+            while (!_initialized)
                 Thread.Sleep(500);
         }
 
@@ -43,22 +43,9 @@ namespace StrategyIncubator
             if (e.User.Id == _client.CurrentUser.Id)
                 return;
 
-            if (_channel == null)
-            {
-                /*To initialize the bot account it needs to see a message.
-                I don't know why, but simply typing in any channel or server
-                that the bot is in (private message included) allows the bot
-                to find channels among the servers it's connected to.
-                
-                So after a message has been seen by the bot we'll find our
-                posting channel using the Channel ID provided in the Settings.*/
-                _channel = _client.GetChannel(_config.channelid);
-
-                if (_channel == null)
-                    _log.Write(Log.LogLevel.Error, "Error finding channel!");
-                else
-                    _log.Write(Log.LogLevel.Success, "Got the channel!");
-            }
+            /*We'll need to receive a message first in order to find channels
+            for some reason, so this is what we will do.*/
+            _initialized = true;
         }
 
         private void _bwg_DoWork(object sender, DoWorkEventArgs e)
@@ -79,19 +66,26 @@ namespace StrategyIncubator
             _log.Write(Log.LogLevel.Info, $"Backgroundworker exited.");
         }
 
-        public void SendMessage(Post post)
+        public void SendMessage(Post post, Task task)
         {
-            /*_config.discordmsg string should include {0}, {1}, {2} & {3}
+            /*discordmsg string should include {0}, {1}, {2} & {3}
             for formatting the message here*/
-            string msgStr = string.Format(_config.discordmsg, 
-                post.author, 
-                post.title, 
-                post.link, 
+            string msgStr = string.Format(task.discordmsg,
+                post.author,
+                post.title,
+                post.link,
                 post.summary);
 
             try
             {
-                _channel.SendMessage(msgStr);
+                var channel = _client.GetChannel(task.channelid);
+                if (channel == null)
+                {
+                    _log.Write(Log.LogLevel.Error, $"Unable to find channel to send message {msgStr}");
+                    return;
+                }
+
+                channel.SendMessage(msgStr);
                 _log.Write(Log.LogLevel.Info, $"Alerted about new post at {post.link}");
             }
             catch (Exception ex)
