@@ -13,7 +13,6 @@ namespace StrategyIncubator
             if (settings != null)
             {
                 settings.appversion = $"{Assembly.GetExecutingAssembly().GetName().Version}";
-
                 Console.Title = $"Strategy Incubator v{settings.appversion}";
                 _session = new Session(settings);
             }

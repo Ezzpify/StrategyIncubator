@@ -11,16 +11,6 @@ namespace StrategyIncubator
         private List<string> _logQueue = new List<string>();
         private string _logPath, _logName;
         private int _logQueueSize;
-
-        public enum LogLevel
-        {
-            Debug,
-            Info,
-            Success,
-            Warn,
-            Text,
-            Error
-        }
         
         public Log(string logName, string logPath, int queueSize)
         {
@@ -36,12 +26,17 @@ namespace StrategyIncubator
                 Thread.Sleep(250);
             }
         }
-        
-        private string GetTimestamp()
+
+        public enum LogLevel
         {
-            return DateTime.Now.ToString("d/M/yyyy HH:mm:ss");
+            Debug,
+            Info,
+            Success,
+            Warn,
+            Text,
+            Error
         }
-        
+
         public void Write(LogLevel level, string str, bool logToFile = true, bool writeToConsole = true, bool rawMessage = false)
         {
             switch (level)
@@ -79,6 +74,11 @@ namespace StrategyIncubator
 
             Console.ForegroundColor = ConsoleColor.White;
             FlushLog();
+        }
+
+        private string GetTimestamp()
+        {
+            return DateTime.Now.ToString("d/M/yyyy HH:mm:ss");
         }
         
         private void FlushLog()

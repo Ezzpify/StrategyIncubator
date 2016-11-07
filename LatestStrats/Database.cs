@@ -59,25 +59,6 @@ namespace StrategyIncubator
             }
         }
 
-        private int runSql(string sql)
-        {
-            /* CA2100
-            Should only be used to run inhouse querys which does not
-            come from user input since the values does not get sanitized*/
-            using (var cmd = new SQLiteCommand(sql, _connection))
-            {
-                try
-                {
-                    return cmd.ExecuteNonQuery();
-                }
-                catch (IOException ex)
-                {
-                    _log.Write(Log.LogLevel.Error, $"Error executing SQL: {sql}\n{ex.Message}");
-                    return -1;
-                }
-            }
-        }
-
         public int InsertUnix(long unix)
         {
             using (var cmd = new SQLiteCommand("INSERT INTO timestamps (unix) values (?)", _connection))
@@ -121,6 +102,25 @@ namespace StrategyIncubator
         public void CloseConnection()
         {
             _connection.Close();
+        }
+
+        private int runSql(string sql)
+        {
+            /* CA2100
+            Should only be used to run inhouse querys which does not
+            come from user input since the values does not get sanitized*/
+            using (var cmd = new SQLiteCommand(sql, _connection))
+            {
+                try
+                {
+                    return cmd.ExecuteNonQuery();
+                }
+                catch (IOException ex)
+                {
+                    _log.Write(Log.LogLevel.Error, $"Error executing SQL: {sql}\n{ex.Message}");
+                    return -1;
+                }
+            }
         }
     }
 }

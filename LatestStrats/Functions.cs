@@ -37,5 +37,10 @@ namespace StrategyIncubator
 
             return str;
         }
+
+        public static string GetNumbersFromString(string str)
+        {
+            return Regex.Replace(str, @"[^\d]", "");
+        }
     }
 }

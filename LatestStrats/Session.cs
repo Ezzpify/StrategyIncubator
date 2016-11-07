@@ -83,8 +83,7 @@ namespace StrategyIncubator
             {
                 title = Functions.NullcheckStr(item.Title.Text),
                 link = Functions.NullcheckStr(item.Id),
-                summary = Functions.DiscordifyString
-                    (Functions.NullcheckStr(item.Summary.Text))
+                summary = Functions.DiscordifyString(Functions.NullcheckStr(item.Summary.Text))
             };
 
             var elements = item.ElementExtensions
