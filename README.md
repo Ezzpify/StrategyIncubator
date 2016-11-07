@@ -13,12 +13,21 @@ for members to see when a new post has been made so that they can read it and pr
 ```
 Settings.json
 {
-  "rss": "http://example.com/external?type=rss2",
-  "appname": "StrategyIncubator",
-  "game": "RSS",
-  "token": "Discord bot token",
-  "channelid": 219919180525207552, //Discord channel ID
-  "interval": 120000 //Interval between rss checks in milliseconds
-  "discordmsg": "Author: {0} Post title: {1} Forum link: {2} Post summary {3}" //{0}-{3} needs to be included since they are being formatted.
+  "tasks": [
+    {
+      "rss": "http://example.com/external?nodeid=10&type=rss2",
+      "channelid": 219919180525207552,
+      "discordmsg": "*Author: {0} Post title: {1} Forum link: {2} Post summary {3}"
+    },
+    {
+      "rss": "http://example.com/external?nodeid=20&type=rss2",
+      "channelid": 245028729594707968,
+      "discordmsg": "*Author: {0} Post title: {1} Forum link: {2} Post summary {3}"
+    }
+  ],
+  "intervalMinutes": 5, -- How often rss tasks will be queried (minutes)
+  "appname": "StrategyIncubator", -- Discord app name
+  "game": "RSS", -- Discord playing game label
+  "token": "ABC123" -- Discord bot account access token
 }
 ```
